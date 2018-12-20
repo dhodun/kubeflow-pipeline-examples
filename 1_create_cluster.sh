@@ -24,3 +24,8 @@ kubectl create clusterrolebinding ml-pipeline-admin-binding --clusterrole=cluste
 kubectl create clusterrolebinding pipelinerunnerbinding \
   --clusterrole=cluster-admin \
   --serviceaccount=kubeflow:pipeline-runner
+
+#TODO: create auto-node-pool and large limit on cores
+
+	#gcloud beta container clusters update dhodunpipeline --enable-autoprovisioning \
+	 #       --max-cpu 300 --max-memory 1000

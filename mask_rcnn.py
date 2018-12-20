@@ -31,13 +31,31 @@ from kfp.gcp import use_tpu
 )
 def train_and_deploy(
     project=dsl.PipelineParam(name='project', value='dhodun1'),
-    bucket=dsl.PipelineParam(name='bucket', value='dhodun1-central'),
+    bucket=dsl.PipelineParam(name='bucket', value='gs://dhodun1-central'),
     startYear=dsl.PipelineParam(name='startYear', value='2000')
 ):
   """Pipeline to train Mask RCNN"""
   start_step = 1
 
   if start_step <= 1:
+    preprocess_coco = dsl.ContainerOp(
+      name='preprocess_coco',
+      # image needs to be compile-time string
+      image='gcr.io/dhodun1/preprocess-coco:latest',
+      arguments=[
+        bucket,
+      ],
+      file_outputs={'bucket': '/output.txt'}
+    )
+    preprocess_coco.set_cpu_request('8')
+    preprocess_coco.set_memory_request('30G')
+    preprocess_coco = ObjectDict({
+      'outputs': {
+        'bucket': bucket
+      }
+    })
+"""
+  if start_step <= 2:
     download_and_preprocess = dsl.ContainerOp(
       name='download_and_preprocess',
       # image needs to be a compile-time string
@@ -48,7 +66,7 @@ def train_and_deploy(
         '--bucket', bucket,
         '--start_year', startYear
       ],
-      file_outputs={'bucket': '/output.txt'}
+      file_outputs={'result': '/output.txt'}
     )
   else:
     preprocess = ObjectDict({
@@ -56,8 +74,9 @@ def train_and_deploy(
         'bucket': bucket
       }
     })
-  download_and_preprocess.apply(use_tpu(tpu_cores=32, tpu_resource='v2', tf_version='1.11'))
-"""
+  download_and_preprocess.apply(use_tpu(tpu_cores=8, tpu_resource='v2', tf_version='1.11'))
+  download_and_preprocess.set_gpu_limit(8, vendor='nvidia')
+
 
   # Step 1: Download COCO dataset and transform to TFRecords
   if start_step <= 1:
