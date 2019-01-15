@@ -2,10 +2,6 @@
 
 set -ex
 
-echo $1
-echo $2
-echo $3
-
 if [ "$#" -ne 1 ]; then
     echo "Usage: ./preprocess.sh  bucket-name"
     exit

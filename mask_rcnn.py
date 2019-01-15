@@ -31,11 +31,11 @@ from kfp.gcp import use_tpu
 )
 def train_and_deploy(
     project=dsl.PipelineParam(name='project', value='dhodun1'),
-    bucket=dsl.PipelineParam(name='bucket', value='gs://dhodun1-central'),
+    bucket=dsl.PipelineParam(name='bucket', value='gs://dhodun1-central1'),
     startYear=dsl.PipelineParam(name='startYear', value='2000')
 ):
   """Pipeline to train Mask RCNN"""
-  start_step = 1
+  start_step = 2
 
   if start_step <= 1:
     preprocess_coco = dsl.ContainerOp(
@@ -49,11 +49,26 @@ def train_and_deploy(
     )
     preprocess_coco.set_cpu_request('8')
     preprocess_coco.set_memory_request('30G')
+  else:
     preprocess_coco = ObjectDict({
       'outputs': {
         'bucket': bucket
       }
     })
+
+  if start_step <=2:
+    train_mask_rcnn = dsl.ContainerOp(
+      name='train_mask_rcnn',
+      # image needs to be a compile-time string
+      image='gcr.io/dhodun1/train-mask-rcnn',
+      arguments=[
+        bucket,
+      ],
+      #file_outputs={'results': '/output.txt'}
+    )
+    train_mask_rcnn.apply(use_tpu(tpu_cores=8, tpu_resource='v3', tf_version='1.12'))
+    train_mask_rcnn.set_cpu_request('8')
+    train_mask_rcnn.set_memory_request('30G')
 """
   if start_step <= 2:
     download_and_preprocess = dsl.ContainerOp(
