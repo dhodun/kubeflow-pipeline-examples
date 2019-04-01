@@ -1,0 +1,11 @@
+resnet_checkpoint: gs://cloud-tpu-artifacts/resnet/resnet-nhwc-2018-02-07/model.ckpt-112603
+resnet_depth: 50
+use_bfloat16: False
+train_batch_size: 1
+eval_batch_size: 1
+training_file_pattern: gs://maskrcnn-kfp/coco/train-*
+validation_file_pattern: gs://maskrcnn-kfp/coco/val-*
+val_json_file: gs://maskrcnn-kfp/coco/instances_val2017.json
+total_steps: 1
+num_steps_per_eval: 1
+eval_samples: 1

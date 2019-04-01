@@ -24,18 +24,18 @@ cd /tpu/models/experimental/mask_rcnn
 python mask_rcnn_main.py \
     --use_tpu=True \
     --model_dir=${GCS_MODEL_DIR:?} \
-    --resnet_checkpoint=${RESNET_CHECKPOINT} \
-    --hparams="resnet_depth=${RESNET_DEPTH},use_bfloat16=true,learning_rate=0.00001,lr_warmup_init=0.00001" \
     --num_cores=8 \
-    --train_batch_size=64 \
-    --training_file_pattern="${PATH_GCS_MASKRCNN:?}/train-*" \
-    --validation_file_pattern="${PATH_GCS_MASKRCNN:?}/val-*" \
-    --val_json_file="${PATH_GCS_MASKRCNN:?}/instances_val2017.json" \
-    --mode="train_and_eval" \
-    --eval_batch_size=8 \
-    --num_epochs=1 \
-    --iterations_per_loop=10 \
-    --num_examples_per_epoch=640 \
-    --eval_samples=8
+    --mode="train" \
+    --config="resnet_checkpoint=${RESNET_CHECKPOINT},resnet_depth=${RESNET_DEPTH},use_bfloat16=true,train_batch_size=64,eval_batch_size=8,training_file_pattern=${PATH_GCS_MASKRCNN:?}/train-*,validation_file_pattern=${PATH_GCS_MASKRCNN:?}/val-*,val_json_file=${PATH_GCS_MASKRCNN:?}/instances_val2017.json,total_steps=22500,iterations_per_loop=200"
     #--num_examples_per_epoch=6400 \
-
+    #--hparams="resnet_depth=${RESNET_DEPTH},use_bfloat16=true,learning_rate=0.00001,lr_warmup_init=0.00001" \
+    #--train_batch_size=64 \
+    #--training_file_pattern="${PATH_GCS_MASKRCNN:?}/train-*" \
+    #--validation_file_pattern="${PATH_GCS_MASKRCNN:?}/val-*" \
+    #--val_json_file="${PATH_GCS_MASKRCNN:?}/instances_val2017.json" \
+    #--mode="train_and_eval" \
+    #--eval_batch_size=8 \
+    #--num_epochs=1 \
+    #--iterations_per_loop=10 \
+    #--num_examples_per_epoch=640 \
+    #--eval_samples=8 \

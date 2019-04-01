@@ -1,5 +1,5 @@
 
-FROM gcr.io/tensorflow/tpu-models:r1.11
+FROM gcr.io/tensorflow/tpu-models:r1.12
 
 RUN mkdir /app
 WORKDIR /app

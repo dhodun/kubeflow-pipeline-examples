@@ -26,7 +26,7 @@ class ObjectDict(dict):
 from kfp.gcp import use_tpu
 
 @dsl.pipeline(
-  name='mask_rcnn',
+  name='mask_rcnn_trt_full',
   description='Preprocess COCO and train Mask RCNN Model'
 )
 def train_and_deploy(
@@ -35,19 +35,29 @@ def train_and_deploy(
     startYear=dsl.PipelineParam(name='startYear', value='2000')
 ):
   """Pipeline to train Mask RCNN"""
-  start_step = 2
+
+  reprocess_coco = dsl.ContainerOp(
+    name='preprocess_coco',
+    # image needs to be compile-time string
+    image='gcr.io/dhodun1/preprocess-coco:latest',
+    arguments=[
+      bucket,
+    ],
+    file_outputs={'bucket': '/output.txt'}
+  )
 
   if start_step <= 1:
     preprocess_coco = dsl.ContainerOp(
       name='preprocess_coco',
       # image needs to be compile-time string
       image='gcr.io/dhodun1/preprocess-coco:latest',
-      arguments=[],
+      arguments=[
+        bucket,
+      ],
       file_outputs={'bucket': '/output.txt'}
     )
-    preprocess_coco.container.set_cpu_request('8')
-    preprocess_coco.container.set_memory_request('30G')
-
+    preprocess_coco.set_cpu_request('8')
+    preprocess_coco.set_memory_request('30G')
   else:
     preprocess_coco = ObjectDict({
       'outputs': {
@@ -59,18 +69,15 @@ def train_and_deploy(
     train_mask_rcnn = dsl.ContainerOp(
       name='train_mask_rcnn',
       # image needs to be a compile-time string
-      image='gcr.io/dhodun1/train-mask-rcnn:latest-cpu',
-      # had to set this since tagging cpu-latest and k8s is caching
-      #image_pull_policy='Always',
-      arguments=[],
+      image='gcr.io/dhodun1/train-mask-rcnn',
+      arguments=[
+        bucket,
+      ],
       #file_outputs={'results': '/output.txt'}
     )
-    #train_mask_rcnn.apply(use_tpu(tpu_cores=8, tpu_resource='v3', tf_version='1.12'))
-    train_mask_rcnn.container.set_cpu_request('8')
-    train_mask_rcnn.container.set_memory_request('30G')
-    train_mask_rcnn.container.set_pull_image_policy('Always')
-
-
+    train_mask_rcnn.apply(use_tpu(tpu_cores=8, tpu_resource='v3', tf_version='1.12'))
+    train_mask_rcnn.set_cpu_request('8')
+    train_mask_rcnn.set_memory_request('30G')
 """
   if start_step <= 2:
     download_and_preprocess = dsl.ContainerOp(
