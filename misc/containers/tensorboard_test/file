@@ -1,0 +1,5 @@
+{"outputs": [{"source": "tb_dir", "type": "tensorboard"}]}
+{"outputs": [{"source": "$tb_dir", "type": "tensorboard"}]}
+{"outputs": [{"source": "${tb_dir}", "type": "tensorboard"}]}
+{"outputs": [{"source": "$(tb_dir)", "type": "tensorboard"}]}
+{"outputs": [{"source": "gs://test1/test2", "type": "tensorboard"}]}
