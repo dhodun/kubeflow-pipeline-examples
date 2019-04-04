@@ -9,7 +9,9 @@ fi
 
 DATA_BUCKET=$1
 
-cd /tpu/tools/datasets && \
-bash download_and_preprocess_coco.sh ./data/dir/coco
-gsutil -m cp ./data/dir/coco/*.tfrecord ${DATA_BUCKET}/coco && \
-gsutil cp ./data/dir/coco/raw-data/annotations/*.json ${DATA_BUCKET}/coco
+#cd /tpu/tools/datasets && \
+#bash download_and_preprocess_coco.sh ./data/dir/coco
+#gsutil -m cp ./data/dir/coco/*.tfrecord ${DATA_BUCKET}/coco && \
+#gsutil cp ./data/dir/coco/raw-data/annotations/*.json ${DATA_BUCKET}/coco
+
+echo ${DATA_BUCKET}/coco > /output.txt

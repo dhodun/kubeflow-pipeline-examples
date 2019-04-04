@@ -8,9 +8,7 @@ PIPELINE_FILENAME='mask_rcnn.py.tgz'
 client = kfp.Client('127.0.0.1:8085/pipeline')
 experiment = client.create_experiment(EXPERIMENT_NAME)
 arguments = {'project': 'dhodun1',
-             'bucket': 'gs://maskrcnn-kfp',
-             'useTPU': False}
-
+             'bucket': 'gs://maskrcnn-kfp'}
 #Submit a pipeline run
 run_name = PIPELINE_RUN_NAME + ' run'
 run_result = client.run_pipeline(experiment.id, run_name, PIPELINE_FILENAME, arguments)

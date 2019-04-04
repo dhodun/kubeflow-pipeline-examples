@@ -35,8 +35,9 @@ def train_and_deploy(
         project='dhodun1',
         bucket='gs://maskrcnn-kfp',
         #TODO: non-camel-case was conflicting with the use_tpu op modifier
-        useTPU=True
 ):
+  usetpu = False
+
   """Pipeline to train Mask RCNN"""
   start_step = 1
 
@@ -46,27 +47,31 @@ def train_and_deploy(
       # image needs to be compile-time string
       image='gcr.io/dhodun1/preprocess-coco:latest',
       arguments=[bucket],
-      file_outputs={'bucket': '/output.txt'}
+      file_outputs={'coco_dir': '/output.txt'}
     )
     preprocess_coco.container.set_cpu_request('8')
     preprocess_coco.container.set_memory_request('30G')
-
 
   if start_step <=2:
     train_mask_rcnn = dsl.ContainerOp(
       name='train_mask_rcnn_tpu',
       # image needs to be a compile-time string
       image='gcr.io/dhodun1/train-mask-rcnn-cpu:latest',
-      arguments=[bucket],
-      file_outputs={'model_dir': '/output.txt'}
+      arguments=[bucket,
+                 preprocess_coco.outputs['coco_dir'],
+                 str(usetpu)],
+      file_outputs={'model_dir': '/model_dir.txt',
+                    'mAP_box': '/map_box.txt',
+                    'mAP_segm': '/map_segm.txt'}
     )
     train_mask_rcnn.after(preprocess_coco)
     train_mask_rcnn.container.set_cpu_request('8')
     train_mask_rcnn.container.set_memory_request('30G')
     #train_mask_rcnn_tpu.container.set_pull_image_policy('Always')
-    if useTPU:
+    if usetpu:
       train_mask_rcnn.apply(use_tpu(tpu_cores=8, tpu_resource='v3', tf_version='1.12'))
-      train_mask_rcnn.container.image='gcr.io/dhodun1/train-mask-rcnn-tpu:latest'
+      # note needed now that i've consolidated TPU
+      #train_mask_rcnn.container.image='gcr.io/dhodun1/train-mask-rcnn-tpu:latest'
 
 
   if start_step <=3:
