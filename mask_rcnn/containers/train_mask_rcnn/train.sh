@@ -20,7 +20,7 @@ echo '{"outputs": [{"source": "'$MODEL_DIR'", "type": "tensorboard"}]}' >> /mlpi
 
 
 # install nightly TF if running training on CPU
-if [[ $IS_TEST ]]
+if [[ $IS_TEST == "True" ]]
 then
   CONFIG_FILE='config-tpu-test.yaml'
 else
@@ -61,23 +61,14 @@ python /tpu/models/experimental/mask_rcnn/mask_rcnn_main.py \
     --model_dir=$MODEL_DIR \
     --config=$CONFIG_FILE \
     --mode="train_and_eval" \
-    --iterations_per_loop=1
+    --iterations_per_loop=500
 
-echo "Installing tf-nightly for CPU eval"
-pip install tf-nightly==1.14.1.dev20190319
-
-python /tpu/models/experimental/mask_rcnn/mask_rcnn_main.py \
-    --use_tpu=$USE_TPU \
-    --model_dir=$MODEL_DIR \
-    --config=$CONFIG_FILE \
-    --mode="eval" \
-    --iterations_per_loop=1
 
 # find the latest file in the job director
 #TODO: find more reliable way to get this file
 EVAL_FILE="$(gsutil ls -l $MODEL_DIR/eval/events* | sort -k 2 | head -n1 | awk '{ print $NF }')"
 
-# extracts the metrics, dumps into eval_metrics.csv, and exports the 2 most important back into the pipeline
+# extracts the metrics, dumps into eval_metrics.csv, and exports the 2 most important back into the pipeline outputs
 python /tpu/models/experimental/mask_rcnn/extract_metrics.py $EVAL_FILE
 
 echo $MODEL_DIR > /model_dir.txt

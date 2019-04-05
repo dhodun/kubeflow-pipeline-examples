@@ -48,6 +48,8 @@ ZONE=us-central1-a
  
 Create GKE cluster - note the 2 lines regarding TPU. These are required at Cluster creation
 
+n1-standard-8 is based on TPU guide recommendations
+
 ```bash
 gcloud config set compute/zone $ZONE
 gcloud container clusters create $CLUSTERNAME \
@@ -57,8 +59,8 @@ gcloud container clusters create $CLUSTERNAME \
   --scopes cloud-platform \
   --enable-cloud-logging \
   --enable-cloud-monitoring \
-  --machine-type n1-standard-2 \
-  --enable-autoscaling --max-nodes=10 --min-nodes=3 \
+  --machine-type n1-standard-8 \
+  --enable-autoscaling --max-nodes=10 --min-nodes=2 \
   --enable-ip-alias \
   --enable-tpu 
 ```

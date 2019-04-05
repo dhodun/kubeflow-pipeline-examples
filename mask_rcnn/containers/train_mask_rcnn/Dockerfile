@@ -14,6 +14,7 @@ COPY train.sh /app
 COPY test.sh /app
 COPY config-cpu-test.yaml /tpu/models/experimental/mask_rcnn/
 COPY config-tpu-test.yaml /tpu/models/experimental/mask_rcnn/
+COPY config-tpu.yaml /tpu/models/experimental/mask_rcnn/
 COPY extract_metrics.py /tpu/models/experimental/mask_rcnn/
 COPY test.py /tpu/models/experimental/mask_rcnn
 

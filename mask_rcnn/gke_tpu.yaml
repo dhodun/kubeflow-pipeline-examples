@@ -12,8 +12,10 @@ spec:
       - 'gs://maskrcnn-kfp'
       - 'gs://maskrcnn-kfp/coco'
       - 'True'
-      - 'True'
+      - 'False'
     resources:
       limits:
         cloud-tpus.google.com/v3: 8
-        #cpu: 2
+      requests:
+        cpu: 6
+        memory: "25Gi"
