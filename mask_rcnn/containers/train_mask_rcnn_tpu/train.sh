@@ -29,7 +29,7 @@ cd /tpu/models/experimental/mask_rcnn
 python /tpu/models/experimental/mask_rcnn/mask_rcnn_main.py \
     --use_tpu=True \
     --model_dir=$MODEL_DIR \
-    --config="config-cpu.yaml" \
+    --config="config-cpu-test.yaml" \
     --mode="train_and_eval" \
     --iterations_per_loop=1
 

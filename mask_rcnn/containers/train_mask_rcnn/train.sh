@@ -3,14 +3,15 @@
 
 set -ex
 
-if [ "$#" -ne 3 ]; then
-    echo "Usage: ./train.sh  bucket-name train-data-dir useTPU"
+if [ "$#" -ne 4 ]; then
+    echo "Usage: ./train.sh  bucket-name train-data-dir useTPU isTest"
     exit
 fi
 
 STORAGE_BUCKET=$1
 TRAIN_DATA_DIR=$2
 USE_TPU=$3
+IS_TEST=$4
 
 TRAIN_JOB_NAME=job_$(date -u +%y%m%d_%H%M%S)
 MODEL_DIR=$1/mask-rcnn-model/$TRAIN_JOB_NAME
@@ -19,20 +20,38 @@ echo '{"outputs": [{"source": "'$MODEL_DIR'", "type": "tensorboard"}]}' >> /mlpi
 
 
 # install nightly TF if running training on CPU
-
-CONFIG_FILE='config-tpu.yaml'
+if [[ $IS_TEST ]]
+then
+  CONFIG_FILE='config-tpu-test.yaml'
+else
+  CONFIG_FILE='config-tpu.yaml'
+fi
 
 if [[ ! $USE_TPU ]]
 then
   echo "Installing tf-nightly for CPU training"
   pip install tf-nightly==1.14.1.dev20190319
-  CONFIG_FILE='config-tpu.yaml'
+#  if [[ $IS_TEST ]]
+#  then
+#    CONFIG_FILE='config-cpu-test.yaml'
+#  elif
+#    CONFIG_FILE='config-cpu.yaml'
+#  fi
+fi
+
+if [[ $USE_TPU ]]
+then
+  #TODO: validate if CPU eval can happen on TPU trained model at all?
+  #TODO: consolidate these if loops
+  # hack to force eval onto TPU, important because SavedModel exporter creates graph on CPU
+  # note this will ALWAYS force the model on TPU and override others flags
+  sed -i '/"""Builds the forward model graph."""/a\ \ params["use_tpu"] = True' /tpu/models/experimental/mask_rcnn/mask_rcnn_model.py
 fi
 
 
 
 # uses pipe since variable has forward slashes, also logic to remove gs:// if it exists
-sed -i "s|{BUCKET_NAME}|${STORAGE_BUCKET//gs:\/\/}|g" /tpu/models/experimental/mask_rcnn/CONFIG_FILE
+sed -i "s|{BUCKET_NAME}|${STORAGE_BUCKET//gs:\/\/}|g" /tpu/models/experimental/mask_rcnn/$CONFIG_FILE
 
 cd /tpu/models/experimental/mask_rcnn
 
@@ -41,7 +60,7 @@ python /tpu/models/experimental/mask_rcnn/mask_rcnn_main.py \
     --use_tpu=$USE_TPU \
     --model_dir=$MODEL_DIR \
     --config=$CONFIG_FILE \
-    --mode="train" \
+    --mode="train_and_eval" \
     --iterations_per_loop=1
 
 echo "Installing tf-nightly for CPU eval"

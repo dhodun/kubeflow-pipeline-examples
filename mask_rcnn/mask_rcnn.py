@@ -36,7 +36,8 @@ def train_and_deploy(
         bucket='gs://maskrcnn-kfp',
         #TODO: non-camel-case was conflicting with the use_tpu op modifier
 ):
-  usetpu = False
+  usetpu = True
+  istest = True
 
   """Pipeline to train Mask RCNN"""
   start_step = 1
@@ -56,10 +57,11 @@ def train_and_deploy(
     train_mask_rcnn = dsl.ContainerOp(
       name='train_mask_rcnn_tpu',
       # image needs to be a compile-time string
-      image='gcr.io/dhodun1/train-mask-rcnn-cpu:latest',
+      image='gcr.io/dhodun1/train-mask-rcnn:latest',
       arguments=[bucket,
                  preprocess_coco.outputs['coco_dir'],
-                 str(usetpu)],
+                 str(usetpu),
+                 str(istest)],
       file_outputs={'model_dir': '/model_dir.txt',
                     'mAP_box': '/map_box.txt',
                     'mAP_segm': '/map_segm.txt'}

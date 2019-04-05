@@ -3,7 +3,7 @@
 set -e
 
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
     echo "Usage: 6_build_and_run_pipeline.sh train_devicetype isTest"
     exit
 fi
@@ -16,7 +16,7 @@ python3 mask_rcnn.py
 
 cd containers/preprocess_coco
 bash ./build.sh
-cd ../train_mask_rcnn_cpu
+cd ../train_mask_rcnn
 bash ./build.sh
 cd ../train_mask_rcnn_tpu
 bash ./build.sh

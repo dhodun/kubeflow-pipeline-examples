@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: train-mask-rcnn-pod
+  annotations:
+    tf-version.cloud-tpus.google.com: "1.12"
+spec:
+  containers:
+  - name: train-mask-rcnn-container
+    image: gcr.io/dhodun1/train-mask-rcnn:latest
+    args:
+      - 'gs://maskrcnn-kfp'
+      - 'gs://maskrcnn-kfp/coco'
+      - 'True'
+      - 'True'
+    resources:
+      limits:
+        cloud-tpus.google.com/v3: 8
+        #cpu: 2

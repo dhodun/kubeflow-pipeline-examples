@@ -28,7 +28,7 @@ else
 fi
 
 
-CONTAINER_NAME=train-mask-rcnn-cpu
+CONTAINER_NAME=train-mask-rcnn
 
 docker build -t ${CONTAINER_NAME} .
 docker tag ${CONTAINER_NAME} gcr.io/${PROJECT_ID}/${CONTAINER_NAME}:${TAG_NAME}
