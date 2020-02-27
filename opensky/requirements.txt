@@ -1,0 +1,4 @@
+google-cloud-bigquery[pandas]
+altair
+vega_datasets
+matplotlib
